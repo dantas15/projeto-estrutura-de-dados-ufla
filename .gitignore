@@ -6,6 +6,7 @@
 *.lo
 *.o
 *.obj
+programa
 
 # Precompiled Headers
 *.gch
@@ -30,3 +31,6 @@
 *.exe
 *.out
 *.app
+
+# Base de dados
+data_athlete_info.csv
