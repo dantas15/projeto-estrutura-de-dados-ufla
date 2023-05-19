@@ -19,7 +19,7 @@ class Atleta
 private:
   int id;
   char nome[255];
-  char sex[1];
+  char sex[25];
   int idade;
   float altura;
   float peso;
@@ -57,16 +57,18 @@ int main()
 
   ifstream arqCSV("data_athlete_info.csv");
   fstream newArqBi;
-  newArqBi.open("rankToBi.bin", ios::binary | ios::out | ios::in);
+  newArqBi.open("rankToBi.bin", ios::binary | ios::out | ios::in); // caso n funcione, tentar o ios | app
   string vetor[7];
   string coluna;
   string aux;
   Atleta competidor;
+  stringstream linha(aux);
+
+  getline(linha, coluna); // descartar cabeçalho
 
   while (getline(arqCSV, aux))
   {
     stringstream linha(aux);
-    getline(linha, coluna); // descartar cabeçalho
 
     for (int i = 0; i < 7; i++)
     {
@@ -74,7 +76,7 @@ int main()
       vetor[i] = coluna;
     }
 
-    competidor = convertVetor(vetor); // Até então todos os dados se encontram como string, porém a partir de agora são convertidos para seus devidos tipos por meio desse subprograma;
+    competidor = competidor.convertVetor(vetor); // Até então todos os dados se encontram como string, porém a partir de agora são convertidos para seus devidos tipos por meio desse subprograma;
     newArqBi.write((char *)&competidor, sizeof(Atleta));
   }
   newArqBi.close();
@@ -83,7 +85,7 @@ int main()
 
   arqCSV.close();
 
-  printAtletas(competidor); // Mostra as Faculdades já cadastradas assim que o programa é inicializado;
+  competidor.printAtletas(competidor); // Mostra as Faculdades já cadastradas assim que o programa é inicializado;
 
   // Os dados iniciais na abetura atual do programa são mostrados logo de cara para o usuáio, para que o mesmo tenha noção do estado corrente do arquivo binário;
 
@@ -114,51 +116,49 @@ int main()
       break;
     case 1:
       newArqBi.open("rankToBi.bin", ios::in | ios::binary | ios::out);
-      excluirAtletas(newArqBi);
+      competidor.excluirAtletas(newArqBi);
       newArqBi.close();
       break;
 
     case 2:
       cout << "Cadastrar novo(s) Atletas:\n"
            << endl;
-      cadastrarAtletas(competidor);
+      competidor.cadastrarAtletas(competidor);
       break;
     case 3:
       newArqBi.open("rankToBi.bin", ios::in | ios::binary | ios::ate);
       cout << "[1] - Buscar por Sexo\n[2] - Busca por Nome\nOu pressione qualquer numero para voltar ao menu anterior\n> ";
-      opt = retornaEscolha();
+      opt = competidor.retornaEscolha();
       if (opt == 1)
       {
-        buscarPorSexo(newArqBi);
-        break;
+        competidor.buscarPorSexo(newArqBi);
       }
       else if (opt == 2)
       {
-        buscarPorNome(newArqBi);
-        break;
+        competidor.buscarPorNome(newArqBi);
       }
-      else
-        break;
       newArqBi.close();
+      break;
     case 4:
       cout << "Atletas Cadastrados e Ativos:" << endl
            << endl;
-      printAtletas(competidor);
+      competidor.printAtletas(competidor);
       break;
     case 5:
       cout << endl
            << "Arquivo CSV exportado!" << endl;
       newArqBi.open("rankToBi.bin", ios::binary | ios::in | ios::out | ios::ate);
-      exportarCSV(newArqBi);
+      competidor.exportarCSV(newArqBi);
       newArqBi.close();
       break;
     case 6:
       newArqBi.open("rankToBi.bin", ios::binary | ios::in | ios::out | ios::ate);
-      imprimeGap(newArqBi);
+      competidor.imprimeGap(newArqBi);
       newArqBi.close();
       break;
     default:
       cout << "DIGITE UMA OPCAO VALIDA!\n";
+      break;
     }
   } while (opc != 0);
 
@@ -255,7 +255,7 @@ void Atleta::cadastrarAtletas(Atleta competidor) // Subprograma no qual permite 
     cout << "Nome: ";
     cin.getline(competidor.sex, 255);
     cout << "Sexo: ";
-    cin.getline(competidor.sex, 1);
+    cin.getline(competidor.sex, 25);
     cout << "Idade: ";
     cin >> competidor.idade;
     cin.ignore();
@@ -281,9 +281,9 @@ void Atleta::cadastrarAtletas(Atleta competidor) // Subprograma no qual permite 
       cout << "Novo Atleta: " << i + 1 << endl;
       competidor.id = quantAtl + 1;
       cout << "Nome: ";
-      cin.getline(competidor.sex, 255);
+      cin.getline(competidor.nome, 255);
       cout << "Sexo: ";
-      cin.getline(competidor.sex, 1);
+      cin.getline(competidor.sex, 25);
       cout << "Idade: ";
       cin >> competidor.idade;
       cin.ignore();
@@ -365,8 +365,8 @@ void Atleta::buscarPorNome(fstream &newArqBi) // Subprograma que tem a função 
   cout << "\nDigite o nome do atleta > ";
   cin.clear();
   cin.ignore();
-  char nome[25];
-  cin.getline(nome, 25);
+  char nome[255];
+  cin.getline(nome, 255);
   cout << endl;
 
   int cont = 0;
