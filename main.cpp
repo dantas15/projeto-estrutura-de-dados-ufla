@@ -59,7 +59,7 @@ int main()
 
   ifstream arqCSV("data_athlete_info.csv");
   fstream newArqBi;
-  newArqBi.open("rankToBi.bin", ios::binary | ios::out | ios::in); // caso n funcione, tentar o ios | app
+  newArqBi.open("rankToBi.bin", ios::binary | ios::out | ios::in);
   string vetor[7];
   string coluna;
   string aux;
@@ -214,7 +214,7 @@ void Atleta::excluirAtletas(fstream &newArqBi) // SUBPROGRAMA QUE EXCLUI UM ATLE
   int quantAtl = newArqBi.tellg() / sizeof(Atleta);
   Atleta competidor;
 
-  cout << "\nDigite o ID do Atleta a ser excluido (1 - " << quantAtl << ")\n> ";
+  cout << "\nDigite a posicao do Atleta a ser excluido (1 - " << quantAtl << ")\n> ";
   int posicao;
   cin >> posicao;
 
@@ -264,6 +264,7 @@ void Atleta::cadastrarAtletas(Atleta competidor) // Subprograma no qual permite 
   {
   case 1:
     competidor.id = quantAtl + 1;
+    cin.ignore();
     cout << "Nome: ";
     cin.getline(competidor.nome, 255);
     cout << "Sexo: ";
@@ -292,6 +293,7 @@ void Atleta::cadastrarAtletas(Atleta competidor) // Subprograma no qual permite 
     {
       cout << "Novo Atleta: " << i + 1 << endl;
       competidor.id = quantAtl + 1;
+      cin.ignore();
       cout << "Nome: ";
       cin.getline(competidor.nome, 255);
       cout << "Sexo: ";
@@ -321,24 +323,23 @@ void Atleta::cadastrarAtletas(Atleta competidor) // Subprograma no qual permite 
   novoCadastro.close();
 }
 
-void Atleta::trocarAtletas(fstream &newArqBi)
+void Atleta::trocarAtletas(fstream &newArqBi) // Subprograma que altera 2 posicoes/atletas entre si
 {
   Atleta aux1, aux2;
 
   int esc1, esc2;
-  cout << "Digite as 2  posicoes para efetuar a troca: ";
+  cout << "Digite as 2  posicoes em sequencia para efetuar a troca: ";
   cin >> esc1;
-  cout << " <-> ";
   cin >> esc2;
 
-  newArqBi.seekg(esc1, ios::beg);
+  newArqBi.seekg(esc1 * sizeof(Atleta), ios::beg);
   newArqBi.read((char *)&aux1, sizeof(Atleta));
-  newArqBi.seekg(esc2, ios::beg);
+  newArqBi.seekg(esc2 * sizeof(Atleta), ios::beg);
   newArqBi.read((char *)&aux2, sizeof(Atleta));
 
-  newArqBi.seekp(esc2, ios::beg);
+  newArqBi.seekp(esc2 * sizeof(Atleta), ios::beg);
   newArqBi.write((char *)&aux1, sizeof(Atleta));
-  newArqBi.seekp(esc1, ios::beg);
+  newArqBi.seekp(esc1 * sizeof(Atleta), ios::beg);
   newArqBi.write((char *)&aux2, sizeof(Atleta));
 }
 
