@@ -14,9 +14,11 @@ using namespace std;
 // Ordenação por Ano e por Pontuação
 // Busca por Cidade e por País
 
-class Atleta
-{
-private:
+const string NOME_ARQ_BINARIO = "data_athlete_info.bin";
+const string NOME_ARQ_CSV = "data_athlete_info.csv";
+const string NOME_ARQ_SAIDA_CSV = "binToCSV.csv";
+
+struct Atleta {
   int id;
   char nome[255];
   char sex[25];
@@ -25,6 +27,7 @@ private:
   float peso;
   char time[255];
   int valido = 1;
+};
 
 public:
   Atleta convertVetor(string vetor[]);
