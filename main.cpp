@@ -36,6 +36,7 @@ public:
   void printAtletas(Atleta dados);
   void exportarCSV(fstream &arqBi);
   void imprimeGap(fstream &arqBi);
+  void trocarAtletas(fstream &newArqBi);
 };
 
 // Prototipagem dos subprogramas na ordem em que aparecem depois do int main
@@ -49,6 +50,7 @@ void buscarPorNome(fstream &newArqBi);
 void printAtletas(Atleta competidor);
 void exportarCSV(fstream &arqBi);
 void imprimeGap(fstream &arqBi);
+void trocarAtletas(fstream &newArqBi);
 
 int main()
 {
@@ -62,9 +64,6 @@ int main()
   string coluna;
   string aux;
   Atleta competidor;
-  stringstream linha(aux);
-
-  getline(linha, coluna); // descartar cabeçalho
 
   while (getline(arqCSV, aux))
   {
@@ -73,6 +72,15 @@ int main()
     for (int i = 0; i < 7; i++)
     {
       getline(linha, coluna, ',');
+      if (coluna.front() == '"' and coluna.back() != '"')
+      {
+        string colunaTemp;
+        while (coluna.back() != '"')
+        {
+          getline(linha, colunaTemp, ',');
+          coluna += ',' + colunaTemp;
+        }
+      }
       vetor[i] = coluna;
     }
 
@@ -98,12 +106,12 @@ int main()
     printMenu();
     /*[0] - Encerrar programa
       [1] - Ordenar arquivo
-      [2] - Remover universidade
-      [3] - Adicionar universidade
+      [2] - Remover Atleta
+      [3] - Adicionar Atleta(s)
       [4] - Buscar
-      [5] - Imprimir Universidades cadastradas
+      [5] - Imprimir Atletas cadastrados
       [6] - Converter Binário para CSV
-      [7] - Imprimir um intervalo de Universidades
+      [7] - Imprimir um intervalo de Atletas
       */
     cin >> opc;
     cout << "----------------------------\n";
@@ -119,7 +127,6 @@ int main()
       competidor.excluirAtletas(newArqBi);
       newArqBi.close();
       break;
-
     case 2:
       cout << "Cadastrar novo(s) Atletas:\n"
            << endl;
@@ -156,6 +163,11 @@ int main()
       competidor.imprimeGap(newArqBi);
       newArqBi.close();
       break;
+    case 7:
+      newArqBi.open("rankToBi.bin", ios::in | ios::binary | ios::out);
+      competidor.trocarAtletas(newArqBi);
+      newArqBi.close();
+      break;
     default:
       cout << "DIGITE UMA OPCAO VALIDA!\n";
       break;
@@ -185,13 +197,13 @@ void printMenu() // Subprograma no qual sempre orientará o usuário em relaçã
   cout << "\n|--------------MENU--------------|\n"
        << endl;
   cout << "[0] - Encerrar programa\n";
-  // cout << "[1] - Ordenar arquivo\n";
   cout << "[1] - Remover Atleta\n";
   cout << "[2] - Adicionar Atleta(s)\n";
   cout << "[3] - Buscar\n";
   cout << "[4] - Imprimir Atletas cadastrados\n";
   cout << "[5] - Exportar para CSV\n";
-  cout << "[6] - Imprimir um intervalo de Atletas\n"
+  cout << "[6] - Imprimir um intervalo de Atletas\n";
+  cout << "[7] - Trocar 2 atletas de posicao\n"
        << endl;
   cout << "\nEscolha uma opcao! > ";
 }
@@ -253,7 +265,7 @@ void Atleta::cadastrarAtletas(Atleta competidor) // Subprograma no qual permite 
   case 1:
     competidor.id = quantAtl + 1;
     cout << "Nome: ";
-    cin.getline(competidor.sex, 255);
+    cin.getline(competidor.nome, 255);
     cout << "Sexo: ";
     cin.getline(competidor.sex, 25);
     cout << "Idade: ";
@@ -307,6 +319,27 @@ void Atleta::cadastrarAtletas(Atleta competidor) // Subprograma no qual permite 
   }
 
   novoCadastro.close();
+}
+
+void Atleta::trocarAtletas(fstream &newArqBi)
+{
+  Atleta aux1, aux2;
+
+  int esc1, esc2;
+  cout << "Digite as 2  posicoes para efetuar a troca: ";
+  cin >> esc1;
+  cout << " <-> ";
+  cin >> esc2;
+
+  newArqBi.seekg(esc1, ios::beg);
+  newArqBi.read((char *)&aux1, sizeof(Atleta));
+  newArqBi.seekg(esc2, ios::beg);
+  newArqBi.read((char *)&aux2, sizeof(Atleta));
+
+  newArqBi.seekp(esc2, ios::beg);
+  newArqBi.write((char *)&aux1, sizeof(Atleta));
+  newArqBi.seekp(esc1, ios::beg);
+  newArqBi.write((char *)&aux2, sizeof(Atleta));
 }
 
 int Atleta::retornaEscolha()
