@@ -105,7 +105,7 @@ public:
   void ImportarDeCSVParaBinario(const string& nomeArquivoEntradaCSV);
   void ImprimirGapDeAtletas(int gapInicio, int gapFim);
   void AdicinoarAtletaEmPosicaoEspecifica(int posicao);
-  void AlterarDadosEmPosicaoEspecifica(int posicao); // TODO
+  void AlterarDadosEmPosicaoEspecifica(int posicao);
 };
 
 // Prototipagem dos subprogramas na ordem em que aparecem depois do main()
@@ -190,7 +190,11 @@ int main()
       bin.AdicinoarAtletaEmPosicaoEspecifica(pos);
       break;
     case 9: // Alterar dados de um registro numa posicao especifica
-      // TODO
+      int posEditar;
+      cout << "Digite a posicao que deseja efetua a troca, de 1 a " << bin.QuantidadeDeAtletas() << ':' << endl
+           << endl;
+      cin >> posEditar;
+      bin.AlterarDadosEmPosicaoEspecifica(posEditar);
       break;
     case 10: // Importar de arquivo CSV
       bin.ImportarDeCSVParaBinario(NOME_ARQ_CSV);
@@ -216,8 +220,8 @@ void printMenu() // Subprograma no qual sempre orientará o usuário em relaçã
   cout << "[5] - Exportar para CSV\n";
   cout << "[6] - Imprimir um intervalo de Atletas\n";
   cout << "[7] - Trocar 2 atletas de posicao\n";
-  cout << "[8] - Adicionar atleta em uma posicao específica\n"; // TODO
-  cout << "[9] - Alterar dados de um registro numa posicao especifica\n"; // TODO
+  cout << "[8] - Adicionar atleta em uma posicao específica\n";
+  cout << "[9] - Alterar dados de um registro numa posicao especifica\n";
   cout << "[10] - Importar de arquivo CSV\n\n";
   cout << "\nEscolha uma opcao! > ";
 }
@@ -632,4 +636,46 @@ void Binario::AdicinoarAtletaEmPosicaoEspecifica(int posicao)
 
   // Voltando ao ponteiro original
   this->arquivoBin.seekp(posicaoOriginal);
+}
+
+void Binario::AlterarDadosEmPosicaoEspecifica(int posicao)
+{
+  this->Abrir();
+
+  int quantidadeAtletas = this->QuantidadeDeAtletas();
+  if (posicao < 0 || posicao >= quantidadeAtletas)
+  {
+    cout << "Posição inválida." << endl;
+    return;
+  }
+
+  // Editando os dados
+  Atleta atletaAux;
+
+  cout << "Nome: ";
+  cin.getline(atletaAux.nome, 255);
+  cout << "Sexo: ";
+  cin.getline(atletaAux.sex, 25);
+  cout << "Idade: ";
+  cin >> atletaAux.idade;
+  cin.ignore();
+  cout << "Altura: ";
+  cin >> atletaAux.altura;
+  cin.ignore();
+  cout << "Peso: ";
+  cin >> atletaAux.peso;
+  cin.ignore();
+  cout << "Time: ";
+  cin.getline(atletaAux.time, 255);
+
+  // Movendo o ponteiro para a posição desejada
+  int tamanhoAtleta = sizeof(Atleta);
+  streampos posicaoOriginal = this->arquivoBin.tellg();
+  streampos posicaoAlterar = posicao * tamanhoAtleta;
+  this->arquivoBin.seekp(posicaoAlterar);
+
+  // Gravando o novo atleta na posição desejada
+  this->arquivoBin.write((char*)&atletaAux, tamanhoAtleta);
+
+  this->Fechar();
 }
