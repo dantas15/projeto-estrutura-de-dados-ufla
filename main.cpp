@@ -178,14 +178,15 @@ int main()
       break;
     case 7: // Trocar 2 atletas de posicao
         int pos1, pos2;
-        cout << "Digite as 2  posicoes em sequencia para efetuar a troca: ";
-        cin >> pos1;
-        cin >> pos2;
+        cout << "Digite as 2 posicoes em sequencia para efetuar a troca, de 1 a " << bin.QuantidadeDeAtletas() << ':' << endl
+             << endl;
+        cin >> pos1 >> pos2;
         bin.TrocarPosicoes(pos1, pos2);
       break;
     case 8: // Adicionar atleta em uma posicao específica
       int pos;
-      cout << "Digite a posicao que deseja efetua a troca: ";
+      cout << "Digite a posicao que deseja efetua a troca, de 1 a " << bin.QuantidadeDeAtletas() << ':' << endl
+           << endl;
       cin >> pos;
       bin.AdicinoarAtletaEmPosicaoEspecifica(pos);
       break;
@@ -634,8 +635,7 @@ void Binario::AdicinoarAtletaEmPosicaoEspecifica(int posicao)
   this->arquivoBin.seekp(posicaoInserir);
   this->arquivoBin.write((char*)&atletaAux, tamanhoAtleta);
 
-  // Voltando ao ponteiro original
-  this->arquivoBin.seekp(posicaoOriginal);
+  this->Fechar();
 }
 
 void Binario::AlterarDadosEmPosicaoEspecifica(int posicao)
