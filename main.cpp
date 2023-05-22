@@ -104,7 +104,7 @@ public:
   void ExportarParaCSV(string nomeArquivoSaidaCSV);
   void ImportarDeCSVParaBinario(const string& nomeArquivoEntradaCSV);
   void ImprimirGapDeAtletas(int gapInicio, int gapFim);
-  void AdicinoarAtletaEmPosicaoEspecifica(int posicao); // TODO
+  void AdicinoarAtletaEmPosicaoEspecifica(int posicao);
   void AlterarDadosEmPosicaoEspecifica(int posicao); // TODO
 };
 
@@ -184,7 +184,10 @@ int main()
         bin.TrocarPosicoes(pos1, pos2);
       break;
     case 8: // Adicionar atleta em uma posicao específica
-      // TODO
+      int pos;
+      cout << "Digite a posicao que deseja efetua a troca: ";
+      cin >> pos;
+      bin.AdicinoarAtletaEmPosicaoEspecifica(pos);
       break;
     case 9: // Alterar dados de um registro numa posicao especifica
       // TODO
@@ -568,4 +571,65 @@ void Binario::TrocarPosicoes(int pos1, int pos2) // Subprograma que altera 2 pos
   this->arquivoBin.write((char *)&aux2, sizeof(Atleta));
 
   this->Fechar();
+}
+
+void Binario::AdicinoarAtletaEmPosicaoEspecifica(int posicao)
+{
+  this->Abrir();
+
+  // Verificar se a posição é válida
+  int quantidadeAtletas = this->QuantidadeDeAtletas();
+  if (posicao < 0 || posicao > quantidadeAtletas)
+  {
+    cout << "Posição inválida." << endl;
+    return;
+  }
+
+  Atleta atletaAux;
+
+  // Inserindo os dados
+  atletaAux.id = this->QuantidadeDeAtletas() + 1;
+  cin.ignore();
+  cout << "Nome: ";
+  cin.getline(atletaAux.nome, 255);
+  cout << "Sexo: ";
+  cin.getline(atletaAux.sex, 25);
+  cout << "Idade: ";
+  cin >> atletaAux.idade;
+  cin.ignore();
+  cout << "Altura: ";
+  cin >> atletaAux.altura;
+  cin.ignore();
+  cout << "Peso: ";
+  cin >> atletaAux.peso;
+  cin.ignore();
+  cout << "Time: ";
+  cin.getline(atletaAux.time, 255);
+
+
+  // Movendo o ponteiro para a posição desejada
+  int tamanhoAtleta = sizeof(Atleta);
+  streampos posicaoOriginal = this->arquivoBin.tellg();
+  streampos posicaoInserir = posicao * tamanhoAtleta;
+  this->arquivoBin.seekp(posicaoInserir);
+
+  // Deslocando os elementos posteriores para a direita
+  for (int i = quantidadeAtletas - 1; i >= posicao; i--)
+  {
+    streampos posicaoAtual = i * tamanhoAtleta;
+    this->arquivoBin.seekg(posicaoAtual);
+    Atleta elemento;
+    this->arquivoBin.read((char*)&elemento, tamanhoAtleta);
+
+    streampos proximaPosicao = (i + 1) * tamanhoAtleta;
+    this->arquivoBin.seekp(proximaPosicao);
+    this->arquivoBin.write((char*)&elemento, tamanhoAtleta);
+  }
+
+  // Inserindo o novo atleta na posição desejada
+  this->arquivoBin.seekp(posicaoInserir);
+  this->arquivoBin.write((char*)&atletaAux, tamanhoAtleta);
+
+  // Voltando ao ponteiro original
+  this->arquivoBin.seekp(posicaoOriginal);
 }
