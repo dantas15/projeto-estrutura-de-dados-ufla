@@ -11,8 +11,7 @@ using namespace std;
 
 // Campos: id; Nome; Idade; Altura; Peso; Time
 
-// Ordenação por Ano e por Pontuação
-// Busca por Cidade e por País
+// Busca por Nome e por Sexo
 
 const string NOME_ARQ_BINARIO = "data_athlete_info.bin";
 const string NOME_ARQ_CSV = "data_athlete_info.csv";
@@ -35,6 +34,7 @@ class Binario
 private:
   string nomeArquivoBin;
   fstream arquivoBin;
+
 public:
   Binario(string nomeArquivoBinario);
   ~Binario()
@@ -102,8 +102,8 @@ public:
   void BuscarPorNome();
   void TrocarPosicoes(int pos1, int pos2);
   void ExportarParaCSV(string nomeArquivoSaidaCSV);
-  void ImportarDeCSVParaBinario(const string& nomeArquivoEntradaCSV);
-  void ImprimirGapDeAtletas(int gapInicio, int gapFim);
+  void ImportarDeCSVParaBinario(const string &nomeArquivoEntradaCSV);
+  void ImprimirGapDeAtletas();
   void AdicinoarAtletaEmPosicaoEspecifica(int posicao);
   void AlterarDadosEmPosicaoEspecifica(int posicao);
 };
@@ -111,7 +111,7 @@ public:
 // Prototipagem dos subprogramas na ordem em que aparecem depois do main()
 int retornaEscolha();
 Atleta convertVetor(string vetor[]); // Subprograma no qual trabalha em conjunto com as primeiras linhas da função main(); Converte as Strings provenientes do arquivo .csv para int, char e float;
-void printMenu(); // Subprograma no qual sempre orientará o usuário em relação as suas opções de escolha na manipulação dos arquivos;
+void printMenu();                    // Subprograma no qual sempre orientará o usuário em relação as suas opções de escolha na manipulação dos arquivos;
 
 int main()
 {
@@ -166,22 +166,18 @@ int main()
       break;
     case 5: // Exportar para CSV
       bin.ExportarParaCSV(NOME_ARQ_SAIDA_CSV);
-      cout << endl << "Arquivo CSV exportado!" << endl;
+      cout << endl
+           << "Arquivo CSV exportado!" << endl;
       break;
     case 6: // Imprimir intervalo (gap) de atletas
-        cout << "Escolha o intervalo que voce quer imprimir no Arquivo, de 1 a " << bin.QuantidadeDeAtletas() << ':' << endl
-             << endl;
-        int gapInicio, gapFim;
-        cin >> gapInicio >> gapFim;
-        cin.ignore();
-        bin.ImprimirGapDeAtletas(gapInicio, gapFim);
+      bin.ImprimirGapDeAtletas();
       break;
     case 7: // Trocar 2 atletas de posicao
-        int pos1, pos2;
-        cout << "Digite as 2 posicoes em sequencia para efetuar a troca, de 1 a " << bin.QuantidadeDeAtletas() << ':' << endl
-             << endl;
-        cin >> pos1 >> pos2;
-        bin.TrocarPosicoes(pos1, pos2);
+      int pos1, pos2;
+      cout << "Digite as 2 posicoes em sequencia para efetuar a troca, de 1 a " << bin.QuantidadeDeAtletas() << ':' << endl
+           << endl;
+      cin >> pos1 >> pos2;
+      bin.TrocarPosicoes(pos1, pos2);
       break;
     case 8: // Adicionar atleta em uma posicao específica
       int pos;
@@ -308,7 +304,7 @@ void Binario::RemoverAtleta(const int &posicao)
   this->Fechar();
 }
 
-void Binario::ImportarDeCSVParaBinario(const string& nomeArquivoEntradaCSV)
+void Binario::ImportarDeCSVParaBinario(const string &nomeArquivoEntradaCSV)
 {
   this->Fechar();
   cout << this->nomeArquivoBin;
@@ -349,7 +345,8 @@ void Binario::ImportarDeCSVParaBinario(const string& nomeArquivoEntradaCSV)
   cout << "Arquivo importado com sucesso!" << endl;
 }
 
-void Binario::ExportarParaCSV(string nomeArquivoSaidaCSV) {
+void Binario::ExportarParaCSV(string nomeArquivoSaidaCSV)
+{
   this->arquivoBin.open(this->nomeArquivoBin, ios::binary | ios::in | ios::out | ios::ate);
 
   ofstream arqCSV(nomeArquivoSaidaCSV);
@@ -372,7 +369,8 @@ void Binario::ExportarParaCSV(string nomeArquivoSaidaCSV) {
   this->Fechar();
 }
 
-void Binario::AdicionarAtleta() {
+void Binario::AdicionarAtleta()
+{
   Atleta atletaAux;
   int opc;
   cout << "Quantos Atletas deseja cadastrar?" << endl
@@ -387,7 +385,36 @@ void Binario::AdicionarAtleta() {
 
   switch (opc)
   {
-    case 1:
+  case 1:
+    atletaAux.id = quantAtl + 1;
+    cin.ignore();
+    cout << "Nome: ";
+    cin.getline(atletaAux.nome, 255);
+    cout << "Sexo: ";
+    cin.getline(atletaAux.sex, 25);
+    cout << "Idade: ";
+    cin >> atletaAux.idade;
+    cin.ignore();
+    cout << "Altura: ";
+    cin >> atletaAux.altura;
+    cin.ignore();
+    cout << "Peso: ";
+    cin >> atletaAux.peso;
+    cin.ignore();
+    cout << "Time: ";
+    cin.getline(atletaAux.time, 255);
+
+    arquivoBin.write((char *)&atletaAux, sizeof(Atleta));
+    break;
+  case 2:
+    cout << "Quantos ao todo voce deseja cadastrar? ";
+    int segOpc;
+    cin >> segOpc;
+    cout << endl;
+
+    for (int i = 0; i < segOpc; i++)
+    {
+      cout << "Novo Atleta: " << i + 1 << endl;
       atletaAux.id = quantAtl + 1;
       cin.ignore();
       cout << "Nome: ";
@@ -407,48 +434,20 @@ void Binario::AdicionarAtleta() {
       cin.getline(atletaAux.time, 255);
 
       arquivoBin.write((char *)&atletaAux, sizeof(Atleta));
-      break;
-    case 2:
-      cout << "Quantos ao todo voce deseja cadastrar? ";
-      int segOpc;
-      cin >> segOpc;
+
       cout << endl;
-
-      for (int i = 0; i < segOpc; i++)
-      {
-        cout << "Novo Atleta: " << i + 1 << endl;
-        atletaAux.id = quantAtl + 1;
-        cin.ignore();
-        cout << "Nome: ";
-        cin.getline(atletaAux.nome, 255);
-        cout << "Sexo: ";
-        cin.getline(atletaAux.sex, 25);
-        cout << "Idade: ";
-        cin >> atletaAux.idade;
-        cin.ignore();
-        cout << "Altura: ";
-        cin >> atletaAux.altura;
-        cin.ignore();
-        cout << "Peso: ";
-        cin >> atletaAux.peso;
-        cin.ignore();
-        cout << "Time: ";
-        cin.getline(atletaAux.time, 255);
-
-        arquivoBin.write((char *)&atletaAux, sizeof(Atleta));
-
-        cout << endl;
-      }
-      break;
-    default:
-      cout << "Opcao Invalida";
-      break;
+    }
+    break;
+  default:
+    cout << "Opcao Invalida";
+    break;
   }
 
   this->Fechar();
 }
 
-void Binario::BuscarPorSexo() {
+void Binario::BuscarPorSexo()
+{
   this->arquivoBin.open(NOME_ARQ_BINARIO, ios::in | ios::binary | ios::ate);
 
   // OPERAÇÕES PARA CALCULAR A QUANTIDADE DE REGISTROS PRESENTES NO ARQUIVO BINÁRIO
@@ -488,7 +487,8 @@ void Binario::BuscarPorSexo() {
   this->Fechar();
 }
 
-void Binario::BuscarPorNome() {
+void Binario::BuscarPorNome()
+{
   this->arquivoBin.open(NOME_ARQ_BINARIO, ios::in | ios::binary | ios::ate);
 
   // OPERAÇÕES PARA CALCULAR A QUANTIDADE DE REGISTROS PRESENTES NO ARQUIVO BINÁRIO
@@ -528,35 +528,47 @@ void Binario::BuscarPorNome() {
   this->Fechar();
 }
 
-void Binario::ImprimirGapDeAtletas(int gapInicio, int gapFim) {
+void Binario::ImprimirGapDeAtletas()
+{
+  this->arquivoBin.open(this->nomeArquivoBin, ios::binary | ios::in | ios::out | ios::ate);
+  long int tamArq = this->arquivoBin.tellg();
+  int quantAtl = int((tamArq / sizeof(Atleta)));
+
+  cout << "Escolha o intervalo que voce quer imprimir no Arquivo, de 1 a " << quantAtl << ':' << endl
+       << endl;
   Atleta competidor;
+  int gapInicio, gapFim;
+  cin >> gapInicio >> gapFim;
+  cin.ignore();
   int cont_atl_validos = (gapFim) - (gapInicio - 1);
-  int quantAtl = this->QuantidadeDeAtletas();
+  bool verificacao = false;
 
   if ((gapInicio > 0) and (gapInicio < quantAtl) and (gapFim > 0) and (gapFim < quantAtl))
   {
     cout << endl
-         << "Universidades Cadastradas e Ativas entre as linhas " << gapInicio << " - " << gapFim << ":" << endl
+         << "Atletas Cadastradas e Ativas entre as linhas " << gapInicio << " - " << gapFim << ":" << endl
          << endl;
     while (gapInicio <= gapFim and cont_atl_validos <= gapFim)
     {
-      this->arquivoBin.seekg((gapInicio - 1) * sizeof(Atleta), fstream::beg);
+      this->arquivoBin.seekg((gapInicio - 1) * sizeof(Atleta)); //
       this->arquivoBin.read((char *)&competidor, sizeof(Atleta));
       if (competidor.valido == 1)
       {
         cout << competidor.id << "  " << competidor.nome << "  " << competidor.sex << "  " << competidor.idade << "  " << competidor.altura << "  " << competidor.peso << "  " << competidor.time << endl;
-      } else
+        verificacao = true;
+      }
+      if (verificacao == false)
       {
         cont_atl_validos--; // Quando a verificação/atleta é falsa, ou seja, está "apagada", a cont_atl_validos guarda um lugar para o próximo atleta que é válida/true
         gapFim++;           // O fim é aumentado a fim de percorrer mais uma linha para esse próximo atleta válida/true
       }
       gapInicio++;
+      verificacao = false;
     }
   }
   else
-  {
     cout << "Intervalo invalido!\n";
-  }
+
   this->Fechar();
 }
 
@@ -611,7 +623,6 @@ void Binario::AdicinoarAtletaEmPosicaoEspecifica(int posicao)
   cout << "Time: ";
   cin.getline(atletaAux.time, 255);
 
-
   // Movendo o ponteiro para a posição desejada
   int tamanhoAtleta = sizeof(Atleta);
   streampos posicaoOriginal = this->arquivoBin.tellg();
@@ -624,16 +635,16 @@ void Binario::AdicinoarAtletaEmPosicaoEspecifica(int posicao)
     streampos posicaoAtual = i * tamanhoAtleta;
     this->arquivoBin.seekg(posicaoAtual);
     Atleta elemento;
-    this->arquivoBin.read((char*)&elemento, tamanhoAtleta);
+    this->arquivoBin.read((char *)&elemento, tamanhoAtleta);
 
     streampos proximaPosicao = (i + 1) * tamanhoAtleta;
     this->arquivoBin.seekp(proximaPosicao);
-    this->arquivoBin.write((char*)&elemento, tamanhoAtleta);
+    this->arquivoBin.write((char *)&elemento, tamanhoAtleta);
   }
 
   // Inserindo o novo atleta na posição desejada
   this->arquivoBin.seekp(posicaoInserir);
-  this->arquivoBin.write((char*)&atletaAux, tamanhoAtleta);
+  this->arquivoBin.write((char *)&atletaAux, tamanhoAtleta);
 
   this->Fechar();
 }
@@ -652,6 +663,7 @@ void Binario::AlterarDadosEmPosicaoEspecifica(int posicao)
   // Editando os dados
   Atleta atletaAux;
 
+  cin.ignore();
   cout << "Nome: ";
   cin.getline(atletaAux.nome, 255);
   cout << "Sexo: ";
@@ -675,7 +687,7 @@ void Binario::AlterarDadosEmPosicaoEspecifica(int posicao)
   this->arquivoBin.seekp(posicaoAlterar);
 
   // Gravando o novo atleta na posição desejada
-  this->arquivoBin.write((char*)&atletaAux, tamanhoAtleta);
+  this->arquivoBin.write((char *)&atletaAux, tamanhoAtleta);
 
   this->Fechar();
 }

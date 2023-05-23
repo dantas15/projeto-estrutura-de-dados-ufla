@@ -16,6 +16,8 @@ sudo apt install g++
 
 ## Como executar o projeto no linux
 
+- crie um arquivo `data_athlete_info.bin` na raiz do projeto
+
 - rode `make`:
 
 ```bash
@@ -27,3 +29,5 @@ make
 ```bash
 ./programa
 ```
+
+- caso seja a primeira vez executando, importe o arquivo csv com o comando 10
