@@ -4,6 +4,8 @@
 #include <cstring>
 #include <sstream>
 
+#include "atleta.hpp"
+
 using namespace std;
 
 // Participantes > Bernardo Bertante Martins, Gustavo Dantas Galote de Lima Padilha, Clarisse Lacerda Pimentel;
