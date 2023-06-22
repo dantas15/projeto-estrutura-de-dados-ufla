@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "atleta.hpp"
+#include "structs.hpp"
 
 #ifndef PROJETO_ESTRUTURA_DE_DADOS_UFLA_UTILS_H
 #define PROJETO_ESTRUTURA_DE_DADOS_UFLA_UTILS_H

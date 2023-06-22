@@ -1,5 +1,5 @@
 #include "cstring"
-#include "atleta.hpp"
+#include "structs.hpp"
 
 #ifndef PROJETO_ESTRUTURA_DE_DADOS_UFLA_ORDENACAO_HPP
 #define PROJETO_ESTRUTURA_DE_DADOS_UFLA_ORDENACAO_HPP

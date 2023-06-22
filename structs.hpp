@@ -1,7 +1,9 @@
 #include <iostream>
+#include <fstream>
 
-#ifndef ATLETA_HPP
-#define ATLETA_HPP
+#ifndef STRUCTS_HPP
+#define STRUCTS_HPP
+using namespace std;
 struct Atleta
 {
   int id;
@@ -13,4 +15,8 @@ struct Atleta
   char time[255];
   int valido = 1;
 };
+struct arquivo {
+    fstream *f;
+    int pos, MAX, *buffer;
+};;
 #endif

@@ -4,7 +4,7 @@
 #include <fstream>
 
 #include "Binario.hpp"
-#include "atleta.hpp"
+#include "structs.hpp"
 #include "utils.hpp"
 
 using namespace std;

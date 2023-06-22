@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "atleta.hpp"
+#include "structs.hpp"
 
 #ifndef PROJETO_ESTRUTURA_DE_DADOS_UFLA_BINARIO_H
 #define PROJETO_ESTRUTURA_DE_DADOS_UFLA_BINARIO_H

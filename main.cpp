@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "atleta.hpp"
+#include "structs.hpp"
 #include "Binario.hpp"
 #include "utils.hpp"
 
