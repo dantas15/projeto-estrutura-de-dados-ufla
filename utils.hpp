@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstring>
 
 #include "structs.hpp"
 
@@ -12,7 +13,7 @@ const string NOME_ARQ_CSV = "data_athlete_info.csv";
 const string NOME_ARQ_SAIDA_CSV = "binToCSV.csv";
 
 // Subprograma no qual sempre orientará o usuário em relação as suas opções de escolha na manipulação dos arquivos;
-void printMenu()
+inline void printMenu()
 {
   cout << "\n|--------------MENU--------------|\n"
        << endl;
@@ -31,7 +32,7 @@ void printMenu()
   cout << "\nEscolha uma opcao! > ";
 }
 
-int retornaEscolha()
+inline int retornaEscolha()
 {
   int n;
   cin >> n;
@@ -39,7 +40,7 @@ int retornaEscolha()
 }
 
 // Subprograma no qual trabalha em conjunto com as primeiras linhas da função main(); Converte as Strings provenientes do arquivo .csv para int, char e float;
-Atleta convertVetor(string vetor[])
+inline Atleta convertVetor(string vetor[])
 {
   Atleta competidor;
 
@@ -53,5 +54,14 @@ Atleta convertVetor(string vetor[])
 
   return competidor;
 }
-
+//
+/*
+ atletaAux.id
+ atletaAux.nome
+ atletaAux.sex
+ atletaAux.idade
+ atletaAux.altura
+ atletaAux.peso
+ atletaAux.time
+ */
 #endif //PROJETO_ESTRUTURA_DE_DADOS_UFLA_UTILS_H

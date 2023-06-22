@@ -3,9 +3,10 @@
 #include <sstream>
 #include <fstream>
 
+#include "utils.hpp"
 #include "Binario.hpp"
 #include "structs.hpp"
-#include "utils.hpp"
+#include "ordenacao.hpp"
 
 using namespace std;
 
@@ -455,4 +456,23 @@ void Binario::AlterarDadosEmPosicaoEspecifica(int posicao) {
   this->arquivoBin.write((char *)&atletaAux, tamanhoAtleta);
 
   this->Fechar();
+}
+
+void Binario::Ordenar(int opcao) {
+  while(opcao != -1) {
+    switch (opcao) {
+      case 1: // Ordenar por id
+        mergeSortExternoPorId(this->nomeArquivoBin);
+        break;
+      case 2: // Ordenar por nome
+
+        break;
+      case -1:
+        break;
+      default:
+        cout << "\nComando inválido. Tente novamente > ";
+        cin >> opcao;
+        break;
+    }
+  }
 }

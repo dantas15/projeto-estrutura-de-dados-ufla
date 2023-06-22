@@ -70,6 +70,6 @@ public:
     void ImprimirGapDeAtletas();
     void AdicinoarAtletaEmPosicaoEspecifica(int posicao);
     void AlterarDadosEmPosicaoEspecifica(int posicao);
-
+    void Ordenar(int opcao);
 };
 #endif //PROJETO_ESTRUTURA_DE_DADOS_UFLA_BINARIO_H

@@ -1,8 +1,8 @@
 #include <iostream>
 
+#include "utils.hpp"
 #include "structs.hpp"
 #include "Binario.hpp"
-#include "utils.hpp"
 
 using namespace std;
 
@@ -101,16 +101,7 @@ int main()
       cout
           << "[1] - Ordenação por ID\n[2] - Ordenação por Nome\n> ";
       opt = retornaEscolha();
-      if (opt == 1)
-      {
-        // TODO Ordernar por ID
-        // bin.();
-      }
-      else if (opt == 2)
-      {
-        // TODO Ordenar por Nome
-        // bin.();
-      }
+      bin.Ordenar(opt);
       bin.Fechar();
       break;
     default:

@@ -17,6 +17,8 @@ struct Atleta
 };
 struct arquivo {
     fstream *f;
-    int pos, MAX, *buffer;
-};;
+    string nome;
+    int pos, MAX;
+    Atleta *buffer;
+};
 #endif
