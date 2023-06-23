@@ -468,7 +468,7 @@ void Binario::Ordenar(int opcao) {
       if (opcao == 1) { // Ordenar por id
         mergeSortExternoPorId(this->nomeArquivoBin);
       } else if (opcao == 2) {
-//        mergeSortExternoPorNome(this->nomeArquivoBin);
+        mergeSortExternoPorNome(this->nomeArquivoBin);
       }
     } else {
     throw runtime_error("Arquivo não existe! Importe-o primeiro");
