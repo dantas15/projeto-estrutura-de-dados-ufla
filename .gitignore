@@ -34,7 +34,7 @@ programa
 
 # Base de dados
 data_athlete_info.csv
-data_athlete_info.bin
+*.bin
 
 # IDE
 .idea

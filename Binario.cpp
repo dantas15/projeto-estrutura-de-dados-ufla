@@ -76,10 +76,13 @@ void Binario::RemoverAtleta(const int &posicao)
 
 void Binario::ImportarDeCSVParaBinario(const string &nomeArquivoEntradaCSV)
 {
+  ifstream arqCSV(nomeArquivoEntradaCSV);
+  if (!arqCSV.good()) {
+    throw runtime_error("Você precisa importar a base de dados antes de utilizar o programa!\nUtilize `make download_csv` e tente novamente.");
+  }
   cout << endl << "Importando de "<< nomeArquivoEntradaCSV << " para " << nomeArquivoBin << endl;
   arquivoBin.open(nomeArquivoBin, ios::binary | ios::out);
   arquivoBin.seekp(0, ios::end);
-  ifstream arqCSV(nomeArquivoEntradaCSV);
 
   string vetor[7];
   string coluna;
@@ -461,20 +464,24 @@ void Binario::AlterarDadosEmPosicaoEspecifica(int posicao) {
 }
 
 void Binario::Ordenar(int opcao) {
-  while(opcao != -1) {
-    switch (opcao) {
-      case 1: // Ordenar por id
-        mergeSortExternoPorId(this->nomeArquivoBin);
-        break;
-      case 2: // Ordenar por nome
+  if(Existe()) {
+    while (opcao != -1) {
+      switch (opcao) {
+        case 1: // Ordenar por id
+          mergeSortExternoPorId(this->nomeArquivoBin);
+          break;
+        case 2: // Ordenar por nome
 
-        break;
-      case -1:
-        break;
-      default:
-        cout << "\nComando inválido. Tente novamente > ";
-        cin >> opcao;
-        break;
+          break;
+        case -1:
+          break;
+        default:
+          cout << "\nComando inválido. Tente novamente > ";
+          cin >> opcao;
+          break;
+      }
     }
+  } else {
+    throw runtime_error("Arquivo não existe! Importe-o primeiro");
   }
 }

@@ -14,7 +14,7 @@
 ## Ordenação na memória secundária
 
 - sera feito um for loop, criando os arquivos menores com tamanho maximo de MAXIMO_CHUNK em `ordenacao.hpp`
-- 
+- o arquivo no preencheBuffer sempre é passado com o file em reading mode
 
 ## recursos
 

@@ -16,8 +16,8 @@ struct Atleta
   int valido = 1;
 };
 struct arquivo {
-    fstream *f;
     string nome;
+    bool valido = true;
     int pos, MAX;
     Atleta *buffer;
 };
