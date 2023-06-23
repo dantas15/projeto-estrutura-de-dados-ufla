@@ -32,8 +32,8 @@ programa
 *.out
 *.app
 
-# Base de dados
-data_athlete_info.csv
+# Bases de dados
+*.csv
 *.bin
 
 # IDE
