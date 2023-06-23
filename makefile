@@ -18,3 +18,7 @@ clean:
 
 download_csv:
 	curl -o data_athlete_info.csv -L $(CSV_URL)
+
+# usado durante o desenvolvimento pra facilitar os testes manuais, nao leve em consideracao :P
+testing:
+	make clean && rm -r data_athlete_info.bin && make && ./programa

@@ -15,7 +15,6 @@ private:
 public:
     Binario(string nomeArquivoBinario) {
       nomeArquivoBin = nomeArquivoBinario;
-      fstream arquivoBin(nomeArquivoBinario);
     }
     ~Binario() {
       if (arquivoBin.is_open())
@@ -23,9 +22,19 @@ public:
         arquivoBin.close();
       }
     }
+    inline bool Existe() {
+      ifstream arqexiste (nomeArquivoBin);
+      bool existe = arqexiste.good();
+      arqexiste.close();
+      return existe;
+    }
     inline bool Abrir() {
       Fechar();
       arquivoBin.open(nomeArquivoBin, ios::binary | ios::in | ios::out);
+      if(!arquivoBin.good()) {
+        throw runtime_error("Erro! O arquivo não existe, importe-o primeiro!");
+      }
+
       return arquivoBin.is_open();
     }
     inline void Fechar() {

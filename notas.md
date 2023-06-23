@@ -4,6 +4,8 @@
 - [x] dividir a classe em dois arquivos:
   - [x] classe com a prototipação dos métodos
   - [x] implementação dos métodos
+- [x] remover opcao de importar
+- [x] importar csv na primeira execucao
 - [ ] melhorar a prototipação dos métodos
   - [ ] mover os `cin`'s para fora dos métodos da classe (no `Binario.cpp`)
 - [ ] ordenação externa (em memória secundária)
@@ -11,7 +13,8 @@
 
 ## Ordenação na memória secundária
 
-- O que é memória secundária?
+- sera feito um for loop, criando os arquivos menores com tamanho maximo de MAXIMO_CHUNK em `ordenacao.hpp`
+- 
 
 ## recursos
 

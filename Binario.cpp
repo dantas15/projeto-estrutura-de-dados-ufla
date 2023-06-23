@@ -25,7 +25,7 @@ void Binario::MostrarTodos()
 {
   this->Abrir();
   int quantAtl = this->QuantidadeDeAtletas();
-  this->arquivoBin.seekg(0, fstream::beg);
+  this->arquivoBin.seekg(0, ios::beg);
 
   Atleta competidorAux;
   for (int i = 0; i < quantAtl; i++)
@@ -76,9 +76,9 @@ void Binario::RemoverAtleta(const int &posicao)
 
 void Binario::ImportarDeCSVParaBinario(const string &nomeArquivoEntradaCSV)
 {
-  this->Fechar();
-  cout << this->nomeArquivoBin;
-  this->arquivoBin.open(this->nomeArquivoBin, ios::binary | ios::out | ios::in);
+  cout << endl << "Importando de "<< nomeArquivoEntradaCSV << " para " << nomeArquivoBin << endl;
+  arquivoBin.open(nomeArquivoBin, ios::binary | ios::out);
+  arquivoBin.seekp(0, ios::end);
   ifstream arqCSV(nomeArquivoEntradaCSV);
 
   string vetor[7];
@@ -108,9 +108,9 @@ void Binario::ImportarDeCSVParaBinario(const string &nomeArquivoEntradaCSV)
     }
 
     competidor = convertVetor(vetor); // Até então todos os dados se encontram como string, porém a partir de agora são convertidos para seus devidos tipos por meio desse subprograma;
-    this->arquivoBin.write((char *)&competidor, sizeof(Atleta));
+    arquivoBin.write((char *)&competidor, sizeof(Atleta));
   }
-  this->Fechar();
+  arquivoBin.close();
   arqCSV.close();
 }
 
@@ -119,6 +119,8 @@ void Binario::ExportarParaCSV(string nomeArquivoSaidaCSV)
   this->arquivoBin.open(this->nomeArquivoBin, ios::binary | ios::in | ios::out | ios::ate);
 
   ofstream arqCSV(nomeArquivoSaidaCSV);
+  // inserindo o cabeçalho
+  arqCSV << "Id,Name,Sex,Age,Height,Weight,Team" << endl;
 
   int quantAtl = this->QuantidadeDeAtletas();
   Atleta atletaAux;

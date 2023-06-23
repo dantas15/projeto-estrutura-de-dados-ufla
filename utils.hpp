@@ -27,8 +27,7 @@ inline void printMenu()
   cout << "[7] - Trocar 2 atletas de posicao\n";
   cout << "[8] - Adicionar atleta em uma posicao específica\n";
   cout << "[9] - Alterar dados de um registro numa posicao especifica\n";
-  cout << "[10] - Importar de arquivo CSV\n";
-  cout << "[11] - Ordenar\n\n";
+  cout << "[10] - Ordenar\n";
   cout << "\nEscolha uma opcao! > ";
 }
 
