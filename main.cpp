@@ -102,10 +102,9 @@ int main() {
             break;
           case 10: // Ordenação
             cout
-                << "[1] - Ordenação por ID\n[2] - Ordenação por Nome\n> ";
+                << "[1] - Ordenação por ID\n[2] - Ordenação por Nome\n";
             opt = retornaEscolha();
             bin.Ordenar(opt);
-            bin.Fechar();
             break;
           default:
             cout << "DIGITE UMA OPCAO VALIDA!\n";

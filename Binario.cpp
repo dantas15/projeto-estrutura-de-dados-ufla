@@ -465,23 +465,12 @@ void Binario::AlterarDadosEmPosicaoEspecifica(int posicao) {
 
 void Binario::Ordenar(int opcao) {
   if(Existe()) {
-    while (opcao != -1) {
-      switch (opcao) {
-        case 1: // Ordenar por id
-          mergeSortExternoPorId(this->nomeArquivoBin);
-          break;
-        case 2: // Ordenar por nome
-
-          break;
-        case -1:
-          break;
-        default:
-          cout << "\nComando inválido. Tente novamente > ";
-          cin >> opcao;
-          break;
+      if (opcao == 1) { // Ordenar por id
+        mergeSortExternoPorId(this->nomeArquivoBin);
+      } else if (opcao == 2) {
+//        mergeSortExternoPorNome(this->nomeArquivoBin);
       }
-    }
-  } else {
+    } else {
     throw runtime_error("Arquivo não existe! Importe-o primeiro");
   }
 }

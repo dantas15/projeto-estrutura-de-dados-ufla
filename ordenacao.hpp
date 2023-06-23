@@ -1,6 +1,7 @@
 #include <cstring>
 #include <string>
 #include <cstdio>
+#include <fstream>
 
 #include "structs.hpp"
 
@@ -16,7 +17,7 @@ void mudaPos(Atleta& a, Atleta& b) {
   a = b;
   b = temp;
 }
-void qSortPorId(Atleta arr[], int low, int high) {
+void qSortPorId(Atleta *&arr, int low, int high) {
   if (low < high) {
     int pivot = arr[high].id;
     int i = low - 1;
@@ -29,14 +30,14 @@ void qSortPorId(Atleta arr[], int low, int high) {
     }
 
     mudaPos(arr[i + 1], arr[high]);
-    qSortPorId(arr, low, i);
-    qSortPorId(arr, i + 2, high);
+    qSortPorId(arr, low, i - 1);
+    qSortPorId(arr, i + 1, high);
   }
 }
 int comparaNomes(const char* nome1, const char* nome2) {
   return strcmp(nome1, nome2);
 }
-void qSortPorNome(Atleta arr[], int low, int high) {
+void qSortPorNome(Atleta *&arr, int low, int high) {
   if (low < high) {
     int i = low;
     int j = high;
@@ -108,7 +109,7 @@ int procuraMenorPorId(arquivo *arq, int numArqs, int K, Atleta *menor) {
     if(arq[i].pos < arq[i].MAX) {
       // se estiver na primeira iteracao, salva como menor
       if (idxMenorId == -1) {
-        idxMenorId = 1;
+        idxMenorId = i;
       // senao, verifica se o id atual é menor que o idxMenorId
       } else if (arq[i].buffer[arq[i].pos].id < arq[idxMenorId].buffer[arq[idxMenorId].pos].id) {
         idxMenorId = i;
@@ -183,25 +184,30 @@ int criaArquivoOrdenadosPorId(string nomeArquivo) {
   Atleta *arr = new Atleta[MAXIMO_CHUNK];
   int cont = 0, total = 0;
 
-  fstream lerArq(nomeArquivo, ios::binary | ios::in);
+  // abrimos o arquivo no final para pegarmos o qntAtletas inicialmente
+  fstream lerArq(nomeArquivo, ios::binary | ios::in | ios::ate);
   Atleta atletaAux;
   string novoNomeArq;
-  while (!lerArq.eof()) {
+
+  int qntAtletas = lerArq.tellg() / sizeof(Atleta);
+  for (int i = 0; i < qntAtletas; i++) {
     // ler e salvar atletas
-    lerArq.seekg(total * sizeof(Atleta));
+    lerArq.seekg(i * sizeof(Atleta), ios::beg); // apontar
     lerArq.read((char *)&atletaAux, sizeof(Atleta));
+    arr[total] = atletaAux;
     total++;
     if (total == MAXIMO_CHUNK) {
       cont++;
       novoNomeArq = "temp_" + to_string(cont) + ".bin";
       qSortPorId(arr, 0,total - 1);
       salvaArquivo(novoNomeArq, arr, total);
+      total = 0;
     }
   }
   if (total > 0) {
     cont++;
     novoNomeArq = "temp_" + to_string(cont) + ".bin";
-    qSortPorId(arr, 0, total);
+    qSortPorId(arr, 0, total - 1);
     salvaArquivo(novoNomeArq, arr, total);
   }
   lerArq.close();
