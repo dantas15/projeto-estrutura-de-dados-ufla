@@ -17,36 +17,27 @@ void mudaPos(Atleta& a, Atleta& b) {
   a = b;
   b = temp;
 }
-void qSortPorId(Atleta *&arr, int low, int high) {
-  if (low < high) {
-    int pivot = arr[high].id;
-    int i = low - 1;
+bool comparaMenorAtleta(const Atleta at1, const Atleta at2) {
+  int comparaNome = strcmp(at1.nome, at2.nome);
 
-    for (int j = low; j <= high - 1; j++) {
-      if (arr[j].id < pivot) {
-        i++;
-        mudaPos(arr[i], arr[j]);
-      }
-    }
-
-    mudaPos(arr[i + 1], arr[high]);
-    qSortPorId(arr, low, i - 1);
-    qSortPorId(arr, i + 1, high);
+  if (comparaNome < 0) {
+    return true;  // at1 é menor que at2
+  } else if (comparaNome == 0) {
+    return at1.id < at2.id;  // comparando pelo id se at1 é menor que at2
+  } else {
+    return false;  // at1 é maior que at2
   }
 }
-int comparaNomes(const char* nome1, const char* nome2) {
-  return strcmp(nome1, nome2);
-}
-void qSortPorNome(Atleta *&arr, int low, int high) {
+void qSort(Atleta *&arr, int low, int high) {
   if (low < high) {
     int i = low;
     int j = high;
-    const char* pivot = arr[(low + high) / 2].nome;
+    const Atleta pivot = arr[(low + high) / 2];
 
     while (i <= j) {
-      while (comparaNomes(arr[i].nome, pivot) < 0)
+      while (comparaMenorAtleta(arr[i], pivot))
         i++;
-      while (comparaNomes(arr[j].nome, pivot) > 0)
+      while (comparaMenorAtleta(pivot, arr[j]))
         j--;
 
       if (i <= j) {
@@ -56,8 +47,8 @@ void qSortPorNome(Atleta *&arr, int low, int high) {
       }
     }
 
-    qSortPorNome(arr, low, j);
-    qSortPorNome(arr, i, high);
+    qSort(arr, low, j);
+    qSort(arr, i, high);
   }
 }
 
