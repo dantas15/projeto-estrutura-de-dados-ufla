@@ -101,10 +101,7 @@ int main() {
             bin.AlterarDadosEmPosicaoEspecifica(posEditar);
             break;
           case 10: // Ordenação
-            cout
-                << "[1] - Ordenação por ID\n[2] - Ordenação por Nome\n";
-            opt = retornaEscolha();
-            bin.Ordenar(opt);
+            bin.Ordenar();
             break;
           default:
             cout << "DIGITE UMA OPCAO VALIDA!\n";
