@@ -7,7 +7,7 @@
 
 #ifndef PROJETO_ESTRUTURA_DE_DADOS_UFLA_ORDENACAO_HPP
 #define PROJETO_ESTRUTURA_DE_DADOS_UFLA_ORDENACAO_HPP
-const int MAXIMO_CHUNK = 1000;
+const int MAXIMO_POR_ARQUIVO = 1000;
 
 /*
  ** Funções para ordenação interna **
@@ -61,12 +61,15 @@ string criaArqTemp(int num) {
 
 void preencheBuffer(arquivo* arq, int tamBuffer) {
   fstream arqBin;
-  arqBin.open(arq->nome, ios::binary | ios::in);
+  arqBin.open(arq->nome, ios::binary | ios::in | ios::out);
 
   if (arqBin.good() && arq->valido) {
+    arqBin.seekg(0, arqBin.end);
+    int tamArquivo = arqBin.tellg() / sizeof(Atleta);
     arq->pos = 0;
     arq->MAX = 0;
-    for (int i = 0; i < tamBuffer || arqBin.eof(); i++) {
+    for (int i = 0; i < tamBuffer && i < tamArquivo; i++) {
+      arqBin.seekg(i * sizeof(Atleta));
       arqBin.read((char *) &arq->buffer[arq->MAX], sizeof(Atleta));
       arq->MAX++;
     }
@@ -75,7 +78,7 @@ void preencheBuffer(arquivo* arq, int tamBuffer) {
   }
 }
 void salvaArquivo(
-    string nomeArquivo,
+    const string& nomeArquivo,
     Atleta *arr,
     int tam
     /*, caso tenho que modificar a linha original: int mudaLinhaFinal*/
@@ -94,65 +97,65 @@ void salvaArquivo(
 }
 
 /* Ordenação por nome e id como desempate */
-int procuraMenor(arquivo *arq, int numArqs, int qntChunk, Atleta *menor) {
-  int idxMenor = -1;
+bool procuraMenor(arquivo *arq, int qntArquivos, int tamBuffer, Atleta *menor) {
+  int idx = -1;
 
   // verifica o menor elemento no buffer de todos os arquivos
-  for (int i = 0; i < numArqs; i++) {
+  for (int i = 0; i < qntArquivos; i++) {
     // verifica se ainda nao atingiu o limite do aquivo
     if(arq[i].pos < arq[i].MAX) {
       // se estiver na primeira iteracao, salva como menor
-      if (idxMenor == -1) {
-        idxMenor = i;
-        // senao, verifica se o nome atual é menor que o idxMenor
-      } else if (comparaMenorAtleta(arq[i].buffer[arq[i].pos], arq[idxMenor].buffer[arq[idxMenor].pos]))
-        idxMenor = i;
+      if (idx == -1) {
+        idx = i;
+        // senao, verifica se o nome atual é menor que o idx
+      } else if (comparaMenorAtleta(arq[i].buffer[arq[i].pos], arq[idx].buffer[arq[idx].pos]))
+        idx = i;
       }
     }
 
   // se encontrou o menor dos arquivos
-  if (idxMenor != -1) {
-    *menor = arq[idxMenor].buffer[arq[idxMenor].pos];
+  if (idx != -1) {
+    *menor = arq[idx].buffer[arq[idx].pos];
     // aqui 'pos' é incrementado para, na próxima iteração,
     // o segundo do arquivo ser comparado
-    arq[idxMenor].pos++;
+    arq[idx].pos++;
 
     // agora verificamos se já percorremos
     // todos os elementos do buffer
-    if (arq[idxMenor].pos == arq[idxMenor].MAX) {
+    if (arq[idx].pos == arq[idx].MAX) {
       // se sim, preenchemos o buffer
-      preencheBuffer(&arq[idxMenor], qntChunk);
+      preencheBuffer(&arq[idx], tamBuffer);
     }
-    return 1; // codigo que encontramos menor
+    return true; // sinalizando que encontramos menor
   } else {
-    return 0; // codigo que nao encontramos menor
+    return false; // sinalizando que nao encontramos menor
   }
 }
-void merge(string nomeArquivo, int numArqs, int qntChunk) {
-  Atleta *buffer = new Atleta[qntChunk];
+void merge(const string& nomeArquivoOriginal, int qntArquivos, int tamBuffer) {
+  Atleta *buffer = new Atleta[tamBuffer];
 
-  arquivo *arqs = new arquivo[numArqs];
+  arquivo *arquivos = new arquivo[qntArquivos];
 
   // cria os arquivos temporários
-  for (int i = 0; i < numArqs; i++) {
+  for (int i = 0; i < qntArquivos; i++) {
     // dados do arquivo
-    arqs[i].nome = criaArqTemp(i + 1);;
-    arqs[i].MAX = 0;
-    arqs[i].pos = 0;
+    arquivos[i].nome = criaArqTemp(i + 1);
+    arquivos[i].MAX = 0;
+    arquivos[i].pos = 0;
     // aloca o buffer com a quantidade de elementos que é
     // possível carregar na memória para cada um dos buffers
-    arqs[i].buffer = new Atleta[qntChunk];
-    preencheBuffer(&arqs[i], qntChunk);
+    arquivos[i].buffer = new Atleta[tamBuffer];
+    preencheBuffer(&arquivos[i], tamBuffer);
   }
 
   Atleta menorAtleta;
   int qntBuffer = 0;
-  while (procuraMenor(arqs, numArqs, qntChunk, &menorAtleta) == 1) {
+  while (procuraMenor(arquivos, qntArquivos, tamBuffer, &menorAtleta)) {
     buffer[qntBuffer] = menorAtleta;
     qntBuffer++;
     // buffer está cheio
-    if(qntBuffer == qntChunk) {
-      salvaArquivo(nomeArquivo, buffer, qntChunk);
+    if(qntBuffer == tamBuffer) {
+      salvaArquivo(nomeArquivoOriginal, buffer, tamBuffer);
       qntBuffer = 0;
     }
   }
@@ -160,23 +163,23 @@ void merge(string nomeArquivo, int numArqs, int qntChunk) {
   // caso tenha arquivos nao salvos no buffer ainda
   // (dados nao multiplos)
   if (qntBuffer != 0) {
-    salvaArquivo(nomeArquivo, buffer, qntBuffer);
+    salvaArquivo(nomeArquivoOriginal, buffer, qntBuffer);
   }
 
   // desalocando memória depois do merge dos arquivos
-  for(int i = 0; i < numArqs; i++) {
-    delete [] arqs[i].buffer;
+  for(int i = 0; i < qntArquivos; i++) {
+    delete [] arquivos[i].buffer;
   }
-  delete [] arqs;
+  delete [] arquivos;
   delete [] buffer;
 }
 
-int criaArquivoOrdenados(string nomeArquivo) {
-  Atleta *arr = new Atleta[MAXIMO_CHUNK];
-  int cont = 0, total = 0;
+int criaArquivoOrdenados(const string& nomeArquivoOriginal) {
+  Atleta *arr = new Atleta[MAXIMO_POR_ARQUIVO];
+  int qntArquivos = 0, total = 0;
 
   // abrimos o arquivo no final para pegarmos o qntAtletas inicialmente
-  fstream lerArq(nomeArquivo, ios::binary | ios::in | ios::ate);
+  fstream lerArq(nomeArquivoOriginal, ios::binary | ios::in | ios::ate);
   Atleta atletaAux;
   string novoNomeArq;
   int qntAtletas = lerArq.tellg() / sizeof(Atleta);
@@ -187,34 +190,34 @@ int criaArquivoOrdenados(string nomeArquivo) {
     lerArq.read((char *)&atletaAux, sizeof(Atleta));
     arr[total] = atletaAux;
     total++;
-    if (total == MAXIMO_CHUNK) {
-      cont++;
-      novoNomeArq = criaArqTemp(cont);
+    if (total == MAXIMO_POR_ARQUIVO) {
+      qntArquivos++;
+      novoNomeArq = criaArqTemp(qntArquivos);
       qSort(arr, 0, total - 1);
       salvaArquivo(novoNomeArq, arr, total);
       total = 0;
     }
   }
   if (total > 0) {
-    cont++;
-    novoNomeArq = criaArqTemp(cont);
+    qntArquivos++;
+    novoNomeArq = criaArqTemp(qntArquivos);
     qSort(arr, 0, total - 1);
     salvaArquivo(novoNomeArq, arr, total);
   }
   lerArq.close();
   delete [] arr;
-  return cont;
+  return qntArquivos;
 }
 
-void mergeSortExterno(string nomeArquivo) {
+void mergeSortExterno(const string& nomeArquivoOriginal) {
   string novoNomeArq;
-  int numArqs = criaArquivoOrdenados(nomeArquivo);
-  int numChunk = MAXIMO_CHUNK / (numArqs + 1);
+  int qntArquivos = criaArquivoOrdenados(nomeArquivoOriginal);
+  int tamBuffer = MAXIMO_POR_ARQUIVO / (qntArquivos + 1);
 
-  remove(nomeArquivo.c_str());
-  merge(nomeArquivo, numArqs, numChunk);
+  remove(nomeArquivoOriginal.c_str());
+  merge(nomeArquivoOriginal, qntArquivos, tamBuffer);
 
-  for(int i = 0; i < numArqs; i++) {
+  for(int i = 0; i < qntArquivos; i++) {
     novoNomeArq = "temp_" + to_string(i + 1) + ".bin";
     remove(novoNomeArq.c_str());
   }
