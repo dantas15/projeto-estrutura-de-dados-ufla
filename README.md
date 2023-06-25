@@ -31,3 +31,9 @@ make
 ```bash
 ./programa
 ```
+
+## participantes
+
+- Bernardo Bertante Martins
+- Gustavo Dantas Galote
+- Clarisse Lacerda Pimentel
