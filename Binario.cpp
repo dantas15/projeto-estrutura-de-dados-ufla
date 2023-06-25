@@ -11,7 +11,7 @@
 using namespace std;
 
 // quantidade de arquivos sendo ordenados na memoria interna, pode mudar se quiser
-const int MAXIMO_MEM = 500;
+const int MAXIMO_MEM = 100;
 
 void Binario::ApontarNoFinal() {
   if (this->Aberto()) // se estiver aberto, aponta

@@ -2,8 +2,9 @@
 
 Projeto prático feito durante a disciplina de estrutura de dados na ufla 2023-1
 
-## requisitos
+## antes de executar
 
+- atualmente estamos carregando 100 elementos [Atleta](./structs.hpp) array por vez. Se quiser, pode mudar a constante [MAXIMO_MEM no Binario.cpp](./Binario.cpp)
 - se não tiver, instale o `g++` e `curl`:
 
 ```bash
@@ -30,6 +31,3 @@ make
 ```bash
 ./programa
 ```
-
-- [ ] TODO: remover esse comando e importar automaticamente
-- caso seja a primeira vez executando, importe o arquivo csv com o comando 10
