@@ -10,6 +10,9 @@
 
 using namespace std;
 
+// quantidade de arquivos sendo ordenados na memoria interna, pode mudar se quiser
+const int MAXIMO_MEM = 500;
+
 void Binario::ApontarNoFinal() {
   if (this->Aberto()) // se estiver aberto, aponta
   {
@@ -465,7 +468,10 @@ void Binario::AlterarDadosEmPosicaoEspecifica(int posicao) {
 
 void Binario::Ordenar() {
   if(Existe()) {
-      mergeSortExterno(this->nomeArquivoBin);
+    string nomeArqBinOrdenado = "dados_ordenados.bin";
+    sortExterno(this->nomeArquivoBin, nomeArqBinOrdenado, MAXIMO_MEM);
+    remove(this->nomeArquivoBin.c_str());
+    rename(nomeArqBinOrdenado.c_str(), this->nomeArquivoBin.c_str());
     } else {
     throw runtime_error("Arquivo não existe! Importe-o primeiro");
   }

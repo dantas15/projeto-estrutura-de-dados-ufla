@@ -1,227 +1,318 @@
+#include <iostream>
 #include <cstring>
-#include <string>
-#include <cstdio>
 #include <fstream>
+#include <sstream>
+#include <limits>
+#include <limits.h>
 
 #include "structs.hpp"
 
 #ifndef PROJETO_ESTRUTURA_DE_DADOS_UFLA_ORDENACAO_HPP
 #define PROJETO_ESTRUTURA_DE_DADOS_UFLA_ORDENACAO_HPP
-const int MAXIMO_POR_ARQUIVO = 1000;
 
-/*
- ** Funções para ordenação interna **
-*/
-void mudaPos(Atleta& a, Atleta& b) {
-  Atleta temp = a;
-  a = b;
-  b = temp;
-}
-bool comparaMenorAtleta(const Atleta at1, const Atleta at2) {
-  int comparaNome = strcmp(at1.nome, at2.nome);
-
-  if (comparaNome < 0) {
-    return true;  // at1 é menor que at2
-  } else if (comparaNome == 0) {
-    return at1.id < at2.id;  // comparando pelo id se at1 é menor que at2
-  } else {
-    return false;  // at1 é maior que at2
-  }
-}
-void qSort(Atleta *&arr, int low, int high) {
-  if (low < high) {
-    int i = low;
-    int j = high;
-    const Atleta pivot = arr[(low + high) / 2];
-
-    while (i <= j) {
-      while (comparaMenorAtleta(arr[i], pivot))
-        i++;
-      while (comparaMenorAtleta(pivot, arr[j]))
-        j--;
-
-      if (i <= j) {
-        mudaPos(arr[i], arr[j]);
-        i++;
-        j--;
-      }
-    }
-
-    qSort(arr, low, j);
-    qSort(arr, i, high);
-  }
+int quantidadeAtletas(ifstream &arq) {
+  streampos posInicial = arq.tellg();
+  arq.seekg(0, arq.end);
+  int qntAtletas = arq.tellg() / sizeof(Atleta);
+  arq.seekg(posInicial); // voltando pro valor do ponteiro do arquivo inicial
+  return qntAtletas;
 }
 
-/*
- ** Funções para ordenação externa **
-*/
-string criaArqTemp(int num) {
-  return ("temp_" + to_string(num) + ".bin");
-}
-
-void preencheBuffer(arquivo* arq, int tamBuffer) {
-  fstream arqBin;
-  arqBin.open(arq->nome, ios::binary | ios::in | ios::out);
-
-  if (arqBin.good() && arq->valido) {
-    arqBin.seekg(0, arqBin.end);
-    int tamArquivo = arqBin.tellg() / sizeof(Atleta);
-    arq->pos = 0;
-    arq->MAX = 0;
-    for (int i = 0; i < tamBuffer && i < tamArquivo; i++) {
-      arqBin.seekg(i * sizeof(Atleta));
-      arqBin.read((char *) &arq->buffer[arq->MAX], sizeof(Atleta));
-      arq->MAX++;
-    }
-    arq->valido = false;
-    arqBin.close();
-  }
-}
-void salvaArquivo(
-    const string& nomeArquivo,
-    Atleta *arr,
-    int tam
-    /*, caso tenho que modificar a linha original: int mudaLinhaFinal*/
-) {
-  // pode ser o arquivo temp_{i}.bin
-  // então não é possível verificar a existência (vamos criar)
-  fstream outputF(nomeArquivo, ios::binary | ios::out | ios::app);
-
-  // já que é arquivo binário,
-  // não vamos nos preocupar com quebra de linha no final
+void salvarArquivo(string nome, Atleta arr[], int tam) {
+  ofstream arq(nome, ios::binary);
   for (int i = 0; i < tam; i++) {
-    outputF.write((char *)&arr[i], sizeof(Atleta));
+    arq.write((char *) (&arr[i]), sizeof(Atleta));
   }
-
-  outputF.close();
+  arq.close();
 }
 
-/* Ordenação por nome e id como desempate */
-bool procuraMenor(arquivo *arq, int qntArquivos, int tamBuffer, Atleta *menor) {
-  int idx = -1;
+class MinHeapNoh {
+public:
+    Atleta atleta;
+    int i;    // posicao dos arquivos temporários
+    int j;    // posicao do próximo pacote que será pego do arquivo temporário i
+    void alterarNome() {
+      atleta.nome[0] = std::numeric_limits<char>::max();
+    }
 
-  // verifica o menor elemento no buffer de todos os arquivos
-  for (int i = 0; i < qntArquivos; i++) {
-    // verifica se ainda nao atingiu o limite do aquivo
-    if(arq[i].pos < arq[i].MAX) {
-      // se estiver na primeira iteracao, salva como menor
-      if (idx == -1) {
-        idx = i;
-        // senao, verifica se o nome atual é menor que o idx
-      } else if (comparaMenorAtleta(arq[i].buffer[arq[i].pos], arq[idx].buffer[arq[idx].pos]))
-        idx = i;
+    void alterarPosicao(int &pos) {
+      atleta.posicao = pos++;
+    };
+};
+
+void swap(MinHeapNoh *x, MinHeapNoh *y) {
+  MinHeapNoh temp = *x;
+  *x = *y;
+  *y = temp;
+}
+
+class MinHeap {
+private:
+    MinHeapNoh *dados;
+    int tamanho;
+
+    int esquerdo(int i) {
+      return 2 * i + 1;
+    }
+
+    int direito(int i) {
+      return 2 * i + 2;
+    }
+
+    void corrigeDescendo(int i) {
+      int esq = esquerdo(i);
+      int dir = direito(i);
+
+      int menor = i;
+
+      if ((esq < tamanho) && ((strcasecmp(dados[esq].atleta.nome, dados[i].atleta.nome)) < 0)) {
+        menor = esq;
+      } else if ((esq < tamanho) && ((strcasecmp(dados[esq].atleta.nome, dados[i].atleta.nome)) == 0) &&
+                 (dados[esq].atleta.id < dados[i].atleta.id)) {
+        menor = esq;
+      }
+
+      if ((dir < tamanho) && ((strcasecmp(dados[dir].atleta.nome, dados[menor].atleta.nome)) < 0)) {
+        menor = dir;
+      } else if ((dir < tamanho) && ((strcasecmp(dados[dir].atleta.nome, dados[menor].atleta.nome)) == 0) &&
+                 (dados[dir].atleta.id < dados[menor].atleta.id)) {
+        menor = dir;
+      }
+
+      if (menor != i) {
+        swap(&dados[i], &dados[menor]);
+        corrigeDescendo(menor);
       }
     }
 
-  // se encontrou o menor dos arquivos
-  if (idx != -1) {
-    *menor = arq[idx].buffer[arq[idx].pos];
-    // aqui 'pos' é incrementado para, na próxima iteração,
-    // o segundo do arquivo ser comparado
-    arq[idx].pos++;
-
-    // agora verificamos se já percorremos
-    // todos os elementos do buffer
-    if (arq[idx].pos == arq[idx].MAX) {
-      // se sim, preenchemos o buffer
-      preencheBuffer(&arq[idx], tamBuffer);
+public:
+    MinHeap(MinHeapNoh arr[], int tam) {
+      tamanho = tam;
+      dados = arr;
+      int i = (tamanho - 1) / 2;
+      while (i >= 0) {
+        corrigeDescendo(i);
+        i--;
+      }
     }
-    return true; // sinalizando que encontramos menor
-  } else {
-    return false; // sinalizando que nao encontramos menor
-  }
-}
-void merge(const string& nomeArquivoOriginal, int qntArquivos, int tamBuffer) {
-  Atleta *buffer = new Atleta[tamBuffer];
 
-  arquivo *arquivos = new arquivo[qntArquivos];
+    ~MinHeap() {
+      delete[] dados;
+    };
 
-  // cria os arquivos temporários
-  for (int i = 0; i < qntArquivos; i++) {
-    // dados do arquivo
-    arquivos[i].nome = criaArqTemp(i + 1);
-    arquivos[i].MAX = 0;
-    arquivos[i].pos = 0;
-    // aloca o buffer com a quantidade de elementos que é
-    // possível carregar na memória para cada um dos buffers
-    arquivos[i].buffer = new Atleta[tamBuffer];
-    preencheBuffer(&arquivos[i], tamBuffer);
-  }
-
-  Atleta menorAtleta;
-  int qntBuffer = 0;
-  while (procuraMenor(arquivos, qntArquivos, tamBuffer, &menorAtleta)) {
-    buffer[qntBuffer] = menorAtleta;
-    qntBuffer++;
-    // buffer está cheio
-    if(qntBuffer == tamBuffer) {
-      salvaArquivo(nomeArquivoOriginal, buffer, tamBuffer);
-      qntBuffer = 0;
+    MinHeapNoh getMin() {
+      return dados[0];
     }
+
+    void inserirMin(MinHeapNoh x) {
+      dados[0] = x;
+      corrigeDescendo(0);
+    }
+};
+
+/* Funções de ordenação */
+void mergeArquivos(const string& nomeArqInput, const string& nomeArqOutput, int n, int k) {
+
+  // Cria a quantidade de nós heap igual ao número de arquivos temporários
+  MinHeapNoh *nohs = new MinHeapNoh[k];
+  Atleta *leitura = new Atleta[1];
+
+  stringstream novoNomeArquivo;
+
+  // Para cada nó heap é atribuido o primeiro pacote da struct Atleta do arquivo temporário i
+  for (int i = 0; i < k; i++) {
+    novoNomeArquivo.str("");
+    novoNomeArquivo.clear();
+    novoNomeArquivo << "temp_";
+    novoNomeArquivo << to_string(i + 1);
+    novoNomeArquivo << ".bin";
+
+    ifstream arqBinLeitura(novoNomeArquivo.str(), ios::binary);
+
+    arqBinLeitura.read((char *) (&leitura[0]), sizeof(Atleta));
+
+    nohs[i].atleta = leitura[0];
+    nohs[i].i = i;
+    nohs[i].j = 1;
+
+    arqBinLeitura.close();
   }
 
-  // caso tenha arquivos nao salvos no buffer ainda
-  // (dados nao multiplos)
-  if (qntBuffer != 0) {
-    salvaArquivo(nomeArquivoOriginal, buffer, qntBuffer);
-  }
+  // Criação do MinHeap com k nohs
+  MinHeap hp(nohs, k);
 
-  // desalocando memória depois do merge dos arquivos
-  for(int i = 0; i < qntArquivos; i++) {
-    delete [] arquivos[i].buffer;
-  }
-  delete [] arquivos;
-  delete [] buffer;
-}
+  int qntArquivos = 0;
 
-int criaArquivoOrdenados(const string& nomeArquivoOriginal) {
-  Atleta *arr = new Atleta[MAXIMO_POR_ARQUIVO];
-  int qntArquivos = 0, total = 0;
+  int posInsercaoFinal = 0;
 
-  // abrimos o arquivo no final para pegarmos o qntAtletas inicialmente
-  fstream lerArq(nomeArquivoOriginal, ios::binary | ios::in | ios::ate);
-  Atleta atletaAux;
-  string novoNomeArq;
-  int qntAtletas = lerArq.tellg() / sizeof(Atleta);
+  ifstream arqBinEntrada(nomeArqInput, ios::binary);
 
-  for (int i = 0; i < qntAtletas; i++) {
-    // ler e salvar atletas
-    lerArq.seekg(i * sizeof(Atleta), ios::beg); // apontar
-    lerArq.read((char *)&atletaAux, sizeof(Atleta));
-    arr[total] = atletaAux;
-    total++;
-    if (total == MAXIMO_POR_ARQUIVO) {
+  arqBinEntrada.close();
+
+  ofstream arqBinResult(nomeArqOutput, ios::binary);
+
+  while (qntArquivos != k) {
+    // Cria-se um nó heap que representa a raiz do heap principal
+    MinHeapNoh raiz = hp.getMin();
+
+    raiz.alterarPosicao(posInsercaoFinal);
+
+    // Insere na raiz (menor nome ou id {atual} de todos os arquivos temporários) no arquivo final
+    arqBinResult.write((char *) (&raiz.atleta), sizeof(Atleta));
+
+    novoNomeArquivo.str("");
+    novoNomeArquivo.clear();
+    novoNomeArquivo << "temp_";
+    novoNomeArquivo << to_string(raiz.i + 1);
+    novoNomeArquivo << ".bin";
+
+    ifstream arqBinInput(novoNomeArquivo.str(), ios::binary);
+    int qntAtletas = quantidadeAtletas(arqBinInput);
+
+
+    if (raiz.j < qntAtletas) { // ainda há pacotes a serem tratados
+      arqBinInput.seekg(raiz.j * sizeof(Atleta), arqBinInput.beg);
+
+      arqBinInput.read((char *) (&leitura[0]), sizeof(Atleta));
+
+      raiz.atleta = leitura[0];
+      raiz.j++;
+    } else { // chegou no final do atual arquivo temporário aberto
+      // logo, ele é desconsiderado (ficando nos nós mais baixos do MinHeap principal)
+      raiz.alterarNome();
       qntArquivos++;
-      novoNomeArq = criaArqTemp(qntArquivos);
-      qSort(arr, 0, total - 1);
-      salvaArquivo(novoNomeArq, arr, total);
-      total = 0;
     }
+    arqBinInput.close();
+
+    // A raiz atual do MinHeap principal é substituída pelo próximo pacote Atleta do atual arquivo temporário "aberto"
+    // O MinHeap é rearranjado (aplica-se o corrigeDescendo) para que o menor nome/id esteja no topo
+    hp.inserirMin(raiz);
   }
-  if (total > 0) {
-    qntArquivos++;
-    novoNomeArq = criaArqTemp(qntArquivos);
-    qSort(arr, 0, total - 1);
-    salvaArquivo(novoNomeArq, arr, total);
-  }
-  lerArq.close();
-  delete [] arr;
-  return qntArquivos;
+
+  arqBinResult.close();
+  delete[] leitura;
 }
 
-void mergeSortExterno(const string& nomeArquivoOriginal) {
-  string novoNomeArq;
-  int qntArquivos = criaArquivoOrdenados(nomeArquivoOriginal);
-  int tamBuffer = MAXIMO_POR_ARQUIVO / (qntArquivos + 1);
+int criarArquivosOrdenados(const string& nomeArqInput, int tamParticao) {
+  ifstream arqBinEntrada(nomeArqInput, ios::binary);
 
-  remove(nomeArquivoOriginal.c_str());
-  merge(nomeArquivoOriginal, qntArquivos, tamBuffer);
+  if (arqBinEntrada) {
+    int qntAtletas = quantidadeAtletas(arqBinEntrada);
 
-  for(int i = 0; i < qntArquivos; i++) {
-    novoNomeArq = "temp_" + to_string(i + 1) + ".bin";
-    remove(novoNomeArq.c_str());
+    arqBinEntrada.seekg(0, arqBinEntrada.beg);
+
+    stringstream nomeArqAux;
+
+    Atleta *arrBin = new Atleta[tamParticao];
+    Atleta *leitura = new Atleta[1];
+
+    int linhaFim = qntAtletas - (qntAtletas % tamParticao);
+    int linhaAtual = 0, cont = 0, total = 0;
+
+    // Lê-se os dados do arquivo original e os insere em arquivos temporários
+    while (linhaAtual < linhaFim) {
+
+      arqBinEntrada.read((char *) (&leitura[0]), sizeof(Atleta));
+
+      arrBin[total] = leitura[0];
+
+      total++;
+
+      // arrBin está cheio
+      if (total == tamParticao) {
+
+        cont++;
+
+        nomeArqAux.str("");
+        nomeArqAux.clear();
+        nomeArqAux << "temp_";
+        nomeArqAux << to_string(cont);
+        nomeArqAux << ".bin";
+
+        // caso queira ver os arquivos sendo criado dinamicamente:
+//        cout << nomeArqAux.str() << " criado com sucesso!" << endl;
+
+        // usando quicksort para ordenação interna
+        arrBin->qsort(0, total - 1);
+
+        // Salva o arquivo temporário
+        salvarArquivo(nomeArqAux.str(), arrBin, tamParticao);
+
+        total = 0;
+      }
+
+      linhaAtual++;
+    }
+
+    // sobraram dados
+    if (linhaAtual != qntAtletas) {
+      Atleta *vetorDadosRestantes = new Atleta[qntAtletas - linhaAtual];
+
+      while (linhaAtual < qntAtletas) {
+        arqBinEntrada.read((char *) (&leitura[0]), sizeof(Atleta));
+        vetorDadosRestantes[total] = leitura[0];
+
+        total++;
+        linhaAtual++;
+      }
+
+      cont++;
+
+      nomeArqAux.str("");
+      nomeArqAux.clear();
+      nomeArqAux << "temp_";
+      nomeArqAux << to_string(cont);
+      nomeArqAux << ".bin";
+
+      // caso queira ver o ultimo arquivo sendo criado dinamicamente:
+//      cout << nomeArqAux.str() << " criado com sucesso!" << endl;
+
+      vetorDadosRestantes->qsort(0, total - 1);
+
+      salvarArquivo(nomeArqAux.str(), vetorDadosRestantes, total);
+
+      delete[] vetorDadosRestantes;
+    }
+
+    arqBinEntrada.close();
+    delete[] leitura;
+    delete[] arrBin;
+    return cont;
+  } else {
+    throw runtime_error("Erro! Arquivo não encontrado");
+  }
+}
+
+void sortExterno(const string& nomeArqInput, const string& nomeArqOutput, int tamParticao) {
+  int qntArquivosOrdenados = -1;
+
+  try {
+    qntArquivosOrdenados = criarArquivosOrdenados(nomeArqInput, tamParticao);
+
+    cout << "quantidade arquivos temporários: " << qntArquivosOrdenados << endl;
+
+    mergeArquivos(nomeArqInput, nomeArqOutput, tamParticao, qntArquivosOrdenados);
+  }
+  catch(exception& e){
+    cout << e.what() << endl;
   }
 
-  cout << "\nArquivo ordenado por nome com sucesso!\n";
+  if (qntArquivosOrdenados != -1) {
+
+    stringstream nomeArqAux;
+
+    // deleta todos os arquivos temporarios criado
+    for(int i = 0; i < qntArquivosOrdenados; i++){
+      nomeArqAux.str("");
+      nomeArqAux.clear();
+      nomeArqAux << "temp_";
+      nomeArqAux << to_string(i + 1);
+      nomeArqAux << ".bin";
+
+      remove(nomeArqAux.str().c_str());
+    }
+    cout << "\nArquivo principal ordenado com sucesso!\n";
+  }
 }
+
 #endif //PROJETO_ESTRUTURA_DE_DADOS_UFLA_ORDENACAO_HPP

@@ -103,8 +103,12 @@ int main() {
           case 10: // Ordenação
             bin.Ordenar();
             break;
+          case 11:
+            // 🤫 apenas mostra a quantidade de atletas cadastrados, segredo
+            cout << endl << bin.QuantidadeDeAtletas() << endl;
+            break;
           default:
-            cout << "DIGITE UMA OPCAO VALIDA!\n";
+            cout << "Digite uma opcao valida!\n";
             break;
         }
       } catch (exception &e) {
