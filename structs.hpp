@@ -14,6 +14,16 @@ struct Atleta
   float peso;
   char time[255];
   int valido = 1;
+  Atleta() {
+    id = -1;
+    memset(nome, 0, sizeof(nome));
+    memset(sex, 0, sizeof(sex));
+    idade = 0;
+    altura = 0;
+    peso = 0;
+    memset(time, 0, sizeof(time));
+    valido = true;
+  }
 };
 struct arquivo {
     string nome;
